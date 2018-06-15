@@ -1,2 +1,1 @@
-#netprog
-network programming using C.
+network programming using C
