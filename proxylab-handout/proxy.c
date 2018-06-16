@@ -88,6 +88,11 @@ void doit(int connfd) {
 
 	sprintf(port_s, "%d", port);
 	/*connect to the end server*/
+
+	/*******debug******/
+	printf("THE HEADER SEND TO END SERVER\n");
+	printf("%s\n", endserver_http_header);
+
 	end_serverfd = Open_clientfd(hostname, port_s);
 	
 	Rio_readinitb(&server_rio, end_serverfd);
