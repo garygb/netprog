@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include "csapp.h"
 
 /* Recommended max cache and object sizes */
 #define MAX_CACHE_SIZE 1049000
@@ -14,31 +15,32 @@ void clienterror(int fd, char *cause, char *errnum,
 
 void build_http_header(char *http_header, char *hostname, char *path, int port, rio_t *client_rio);
 
+void parse_uri(char *uri, char *hostname, char *path, int *port);
+
 int main(int argc, char** argv)
 {
     // printf("%s", user_agent_hdr);
     int listenfd, connfd;
     socklen_t clientlen;
-    int port;
-    char hostname[MAXLINE], port_cli[MAXLINE];
+    char hostname[MAXLINE], port[MAXLINE];
 
     struct sockaddr_storage clientaddr;
 
     if (argc != 2) {
-    	fprintf(stderr, "usage: %s <port>\n", );
+    	fprintf(stderr, "usage: %s <port>\n", argv[0]);
     	exit(1);
     }
-    port = atoi(argv[1]);
+
     
-    listenfd = Open_listenfd(port);
+    listenfd = Open_listenfd(argv[1]);
     while (1) {
     	clientlen = sizeof(clientaddr);
     	connfd = Accept(listenfd, (SA*)&clientaddr, &clientlen);
 
     	/*print accepted message*/
     	Getnameinfo((SA*)&clientaddr, clientlen, hostname, MAXLINE, 
-    		port_cli, MAXLINE, 0);
-    	printf("Accepted connection from (%s, %s).\n", hostname, port_cli);
+    		port, MAXLINE, 0);
+    	printf("Accepted connection from (%s, %s).\n", hostname, port);
 
     	/*sequential handle the client transaction*/
     	doit(connfd);
@@ -56,6 +58,7 @@ void doit(int connfd) {
 	//代理服务器要访问的目的网站的主机名, 文件路径, 端口
 	char hostname[MAXLINE], path[MAXLINE];
 	int port;
+	char port_s[MAXLINE];
 	int end_serverfd;
 	size_t n;
 
@@ -83,18 +86,19 @@ void doit(int connfd) {
 	/*build the http header which will send to the end server*/
 	build_http_header(endserver_http_header, hostname, path, port, &rio);
 
+	sprintf(port_s, "%d", port);
 	/*connect to the end server*/
-	end_serverfd = Open_clientfd(hostname, port);
+	end_serverfd = Open_clientfd(hostname, port_s);
 	
-	Rio_readinitb(server_rio, end_serverfd);
+	Rio_readinitb(&server_rio, end_serverfd);
 	/*write the http header to end server*/
 	Rio_writen(end_serverfd, endserver_http_header, strlen(endserver_http_header));
 
 	while ((n = Rio_readlineb(&server_rio, buf, MAXLINE) != 0)) {
-		printf("proxy received %d bytes from end server, then send.\n", n);
+		printf("proxy received %d bytes from end server, then send.\n", (int)n);
 		Rio_writen(connfd, buf, n);
 	}
-	
+
 	Close(end_serverfd);
 }
 
@@ -166,7 +170,7 @@ void build_http_header(char *http_header, char *hostname, char *path, int port, 
 	sprintf(request_hdr, "GET %s HTTP/1.0\r\n", path);
 
 	/*request headers*/
-	while (Rio_readlineb(&client_rio, buf, MAXLINE)) {
+	while (Rio_readlineb(client_rio, buf, MAXLINE) > 0) {
 		if (strcmp(buf, "\r\n") == 0) {
 			break;
 		}
@@ -188,7 +192,7 @@ void build_http_header(char *http_header, char *hostname, char *path, int port, 
 		sprintf(host_hdr, "Host: %s\r\n", hostname);
 	}
 
-	sprintf(http_header, "%s%s%s%s",
+	sprintf(http_header, "%s%s%s%s%s%s%s",
 		request_hdr,
 		host_hdr,
 		"Connection: close\r\n",
