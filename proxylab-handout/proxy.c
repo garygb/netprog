@@ -73,6 +73,11 @@ void doit(int connfd) {
 	Rio_readlineb(&rio, buf, MAXLINE);
 	sscanf(buf, "%s %s %s", method, uri, version);
 
+	/*******debug*******/
+	printf("METHOD: %s\n", method);
+	printf("URI: %s\n", uri);
+	printf("VERSION:%s\n", version);
+
 	//method含有GET(忽略大小写)返回0
 	if (strcasecmp(method, "GET")) {
 		clienterror(connfd, method, "501", "Not Implemented", 
