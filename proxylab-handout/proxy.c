@@ -107,6 +107,7 @@ void doit(int connfd) {
 
 	while ((n = Rio_readlineb(&server_rio, buf, MAXLINE) != 0)) {
 		printf("proxy received %d bytes from end server, then send.\n", (int)n);
+		printf("%s\n", buf);
 		Rio_writen(connfd, buf, n);
 	}
 
