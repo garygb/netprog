@@ -73,10 +73,7 @@ void doit(int connfd) {
 	Rio_readlineb(&rio, buf, MAXLINE);
 	sscanf(buf, "%s %s %s", method, uri, version);
 
-	/*******debug*******/
-	printf("METHOD: %s\n", method);
-	printf("URI: %s\n", uri);
-	printf("VERSION:%s\n", version);
+
 
 	//method含有GET(忽略大小写)返回0
 	if (strcasecmp(method, "GET")) {
@@ -84,7 +81,11 @@ void doit(int connfd) {
 			"Proxy currently not support this method");
 		return;
 	}
-
+	/*******debug*******/
+	printf("METHOD: %s\n", method);
+	printf("URI: %s\n", uri);
+	printf("VERSION:%s\n", version);
+	
 	//parse the uri -代理服务器收到的uri是完整的ur
 	parse_uri(uri, hostname, path, &port);
 
