@@ -85,7 +85,7 @@ void doit(int connfd) {
 	printf("METHOD: %s\n", method);
 	printf("URI: %s\n", uri);
 	printf("VERSION:%s\n", version);
-	
+
 	//parse the uri -代理服务器收到的uri是完整的ur
 	parse_uri(uri, hostname, path, &port);
 
@@ -97,7 +97,7 @@ void doit(int connfd) {
 
 	/*******debug******/
 	printf("THE HEADER SEND TO END SERVER\n");
-	printf("%s\n", endserver_http_header);
+	printf("%s", endserver_http_header);
 
 	end_serverfd = Open_clientfd(hostname, port_s);
 	
@@ -190,10 +190,10 @@ void build_http_header(char *http_header, char *hostname, char *path, int port, 
 			sprintf(host_hdr, "Host: %s\r\n", hostname);
 		}
 
-		if (strcasecmp(buf, "Connection") &&
-			strcasecmp(buf, "Proxy-Connection") &&
-			strcasecmp(buf, "User-Agent") &&
-			strcasecmp(buf, "Host")) {
+		if ((strstr(buf, "Connection") == NULL) &&
+			(strstr(buf, "Proxy-Connection") == NULL) &&
+			(strstr(buf, "User-Agent") == NULL) &&
+			(strstr(buf, "Host") == NULL)) {
 			strcat(other_hdr, buf);
 		}
 	}
