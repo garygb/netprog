@@ -1,13 +1,13 @@
 #include "csapp.h"
 
-int main(int argc, char const *argv[])
+int main(int argc, char  **argv)
 {
 	int clientfd;
 	char *host, *port; 
 	char buf[MAXLINE];
 	rio_t rio;
 
-	if (arc != 3) {
+	if (argc != 3) {
 		fprintf(stderr, "usage: %s <host> <port>\n", argv[0]);
 	}
 
