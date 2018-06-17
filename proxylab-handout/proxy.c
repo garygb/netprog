@@ -79,6 +79,7 @@ void doit(int connfd) {
 	if (strcasecmp(method, "GET")) {
 		clienterror(connfd, method, "501", "Not Implemented", 
 			"Proxy currently not support this method");
+		printf("Proxy does not implement the method.\n");
 		return;
 	}
 	/*******debug*******/
@@ -106,13 +107,29 @@ void doit(int connfd) {
 	Rio_writen(end_serverfd, endserver_http_header, strlen(endserver_http_header));
 
 	while ((n = Rio_readlineb(&server_rio, buf, MAXLINE) != 0)) {
-		printf("proxy received %d bytes from end server, then send.\n", (int)n);
+		printf("proxy received %d bytes from end server, then send.\n", sizeof(buf));
 		printf("%s\n", buf);
-		Rio_writen(connfd, buf, n);
+		Rio_writen(connfd, buf, sizeof(buf));
 	}
 
 	Close(end_serverfd);
 }
+
+
+void echo(int connfd) {
+	size_t n;
+	char buf[MAXLINE];
+	rio_t rio;
+
+	Rio_readinitb(&rio, connfd);
+	while ((n = Rio_readlineb(&rio, buf, MAXLINE)) != 0) {
+		printf("Server received %d bytes\n", (int)n);
+		Rio_writen(connfd, buf, n);
+	}
+}
+
+
+
 
 /*
  * clienterror - returns an error message to the client
