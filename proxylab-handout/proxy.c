@@ -61,7 +61,8 @@ void doit(int connfd) {
 	char port_s[MAXLINE];
 	int end_serverfd;
 	ssize_t n;
-
+	int len;
+	
 	char endserver_http_header[MAXLINE];
 
 	/*rio is client's rio, server_rio is endserver's rio*/
@@ -106,11 +107,13 @@ void doit(int connfd) {
 	/*write the http header to end server*/
 	Rio_writen(end_serverfd, endserver_http_header, strlen(endserver_http_header));
 
-	while ((n = Rio_readnb(&server_rio, buf, MAXLINE) != 0)) {
-		printf("proxy received %d bytes from end server, then send.\n", (ssize_t)n);
+	while ((n = Rio_readnb(&server_rio, buf, 1) != 0)) {
+		len += n;
 		// printf("%s\n", buf);
 		Rio_writen(connfd, buf, (size_t)n);
 	}
+
+	printf("proxy received %d bytes from end server, then send.\n", len);
 
 	Close(end_serverfd);
 }
